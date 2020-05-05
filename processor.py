@@ -47,9 +47,8 @@ class Matrice:
 
     @SameSize
     def __add__(self, other):
-       matrice = Matrice(* self.shape)
-       matrice.rows = [list(map(lambda x,y : x+y , row,other.mat[i])) for i,row in enumerate(self.mat) ]
-       return matrice
+       rows = [list(map(lambda x,y : x+y , row,other.mat[i])) for i,row in enumerate(self.mat) ]
+       return Matrice.create(rows)
 
     def __rmul__(self, other):
         if isinstance(other,Number):
