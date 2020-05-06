@@ -100,6 +100,35 @@ class Matrice:
     def product(self,row,col):
         return sum([ x * y for x,y in zip(row,col)])
 
+    def removeLine(self,index):
+        rows = self.mat[:index]+self.mat[index+1:]
+        return Matrice.create(rows)
+
+    def removeColumn(self,index):
+        return  self.transpose().removeLine(index).transpose()
+
+    def minor(self,i,j):
+        return self.copy().removeColumn(j).removeLine(i).det()
+
+    def copy(self):
+        return Matrice.create(self.mat)
+
+    def elem(self,i,j):
+        return self.mat[i][j]
+
+    def det(self):
+        if self.shape==(1,1):
+            return self.mat[0][0]
+
+        row,col = self.shape
+        v = 0
+        for i in range(0,col):
+            v +=  (-1 ) ** i  * self.elem(0,i) * self.minor(0,i)
+        return v
+
+
+
+
     @ValidProduct
     def __matmul__(self, other):
 
@@ -129,7 +158,7 @@ def get_matrice(msg):
 
 def menu():
     while True:
-        print("1. Add matrices\n2. Multiply matrix by a constant\n3. Multiply matrices\n4. Transpose matrix\n0. Exit")
+        print("1. Add matrices\n2. Multiply matrix by a constant\n3. Multiply matrices\n4. Transpose matrix\n5. Calculate a determinant\n0. Exit")
         choice=int(input())
 
 
@@ -155,6 +184,14 @@ def menu():
                 result=mat1.transposeVertical()
             else:
                 result=mat1.transposeHorizontal()
+        elif choice ==5:
+            mat1=get_matrice("matrix")
+            result=mat1.det()
+            # print(mat1)
+            # print("++++++++++++")
+            # print("line 1",mat1.removeLine(1))
+            # print("+++++++++++++")
+            # print("col 1",mat1.removeColumn(1))
 
         elif choice== 2:
             mat1=get_matrice("matrix")
