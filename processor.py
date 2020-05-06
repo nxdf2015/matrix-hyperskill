@@ -122,6 +122,9 @@ class Matrice:
 
         row,col = self.shape
         v = 0
+
+        #only expansion by the first row
+        # TODO select a row or a column with zero for  expansion
         for i in range(0,col):
             v +=  (-1 ) ** i  * self.elem(0,i) * self.minor(0,i)
         return v
