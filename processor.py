@@ -1,3 +1,4 @@
+
 from numbers import Number
 from operator import mul
 from functools import partial
@@ -30,7 +31,11 @@ def to_number(x):
 
 
 
-class Matrice:
+class Matrix:
+    """
+    define matrix
+      Matri
+    """
     def __init__(self,rows,columns):
         self.shape=(rows,columns)
         self.mat=[]
@@ -40,14 +45,6 @@ class Matrice:
         matrice = cls(len(rows),len(rows[0]))
         matrice.mat=rows
         return matrice
-
-    @property
-    def rows(self):
-        return self.mat
-
-    @rows.setter
-    def rows(self,rows):
-        self.mat=rows
 
     def set_rows(self):
         n_row,n_column=self.shape
@@ -64,45 +61,49 @@ class Matrice:
 
     @ValidAdd
     def __add__(self, other):
-       matrice = Matrice(* self.shape)
-       matrice.rows = [list(map(lambda x,y : x+y , row,other.mat[i])) for i,row in enumerate(self) ]
-       return matrice
+       rows = [list(map(lambda x,y : x+y , row,other.mat[i])) for i,row in enumerate(self) ]
+       return Matrix.create(rows)
+
 
     def __rmul__(self, other):
         if isinstance(other,Number):
             mult = partial(mul,other)
             new_rows = [ list(map(mult,row)) for row in self]
-            return Matrice.create(new_rows)
+            return Matrix.create(new_rows)
 
     def __mul__(self,other):
         if isinstance(other,Number):
             return other * self
+
+    @ValidProduct
+    def __matmul__(self, other):
+        rows = [ [ self.product(row,col) for col in other.transpose() ]for row in self]
+        return Matrix.create(rows)
 
     def __iter__(self):
         return iter(self.mat)
 
     def transposeHorizontal(self):
         rows = self.mat[::-1]
-        return Matrice.create(rows)
+        return Matrix.create(rows)
 
     def transposeVertical(self):
         return  self.transpose().transposeHorizontal().transpose()
 
-
     def transposeSide(self):
         rows =[ [row[i]for row in self ][::-1] for i in range(self.shape[1]-1,-1,-1)]
-        return Matrice.create(rows)
+        return Matrix.create(rows)
 
     def transpose(self):
         rows = [ [row[i] for row in self] for i in range(self.shape[1])]
-        return Matrice.create(rows)
+        return Matrix.create(rows)
 
     def product(self,row,col):
         return sum([ x * y for x,y in zip(row,col)])
 
     def removeLine(self,index):
         rows = self.mat[:index]+self.mat[index+1:]
-        return Matrice.create(rows)
+        return Matrix.create(rows)
 
     def removeColumn(self,index):
         return  self.transpose().removeLine(index).transpose()
@@ -111,7 +112,7 @@ class Matrice:
         return self.copy().removeColumn(j).removeLine(i).det()
 
     def copy(self):
-        return Matrice.create(self.mat)
+        return Matrix.create(self.mat)
 
     def elem(self,i,j):
         return self.mat[i][j]
@@ -129,14 +130,19 @@ class Matrice:
             v +=  (-1 ) ** i  * self.elem(0,i) * self.minor(0,i)
         return v
 
+    def cofactor(self):
+        row,col=self.shape
+        rows =[ [ (-1)**(i+j) * self.minor(i,j) for j in range(col)] for i in range(row)]
+        return Matrix.create(rows).transpose()
 
 
-
-    @ValidProduct
-    def __matmul__(self, other):
-
-        rows = [ [ self.product(row,col) for col in other.transpose() ]for row in self]
-        return Matrice.create(rows)
+    def inverse(self):
+        rows=[]
+        d = self.det()
+        if d == 0:
+            print("This matrix doesn't have an inverse.")
+        else:
+            return self.cofactor()  * ( d**-1)
 
 
     def __str__(self):
@@ -153,22 +159,25 @@ def get_matrice(msg):
         except:
             invalid=True
         print(f"Enter {msg} matrix: ")
-        mat = Matrice(row,col)
+        mat = Matrix(row, col)
         mat.set_rows()
     return mat
 
 
 
+
 def menu():
     while True:
-        print("1. Add matrices\n2. Multiply matrix by a constant\n3. Multiply matrices\n4. Transpose matrix\n5. Calculate a determinant\n0. Exit")
+        print("1. Add matrices\n2. Multiply matrix by a constant\n3. ",
+              "Multiply matrices\n4. Transpose matrix\n5. Calculate a determinant\n6. ",
+              "Inverse matrix\n0. Exit")
         choice=int(input())
 
 
         if choice==0:
             break
 
-        if choice == 1 or choice == 3:
+        elif choice == 1 or choice == 3:
             mat1=get_matrice("first matrix")
             mat2=get_matrice("second matrix")
             if choice == 1:
@@ -190,16 +199,15 @@ def menu():
         elif choice ==5:
             mat1=get_matrice("matrix")
             result=mat1.det()
-            # print(mat1)
-            # print("++++++++++++")
-            # print("line 1",mat1.removeLine(1))
-            # print("+++++++++++++")
-            # print("col 1",mat1.removeColumn(1))
 
         elif choice== 2:
             mat1=get_matrice("matrix")
             c=to_number(input("Enter constant:"))
             result =  mat1 * c
+        elif choice==6:
+            mat1=get_matrice("matrix")
+            result=mat1.inverse()
+
         print("The result is:")
         print(result)
         print()
