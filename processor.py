@@ -108,7 +108,7 @@ class Matrice:
 
 
     def __str__(self):
-       return "\n".join([" ".join((map(str,row)))for row in self.mat])
+       return "\n".join([" ".join((map(str,row)))for row in self])
 
 
 def get_matrice(msg):
